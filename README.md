@@ -2,36 +2,36 @@
 
 ## CS4100 Final Project
 
-**Team Members:** Sanah Menon, Triya Basu, Isabella Pozzi
+**Team Members:** Sanah Menon, Isabella Pozzi, Triya Basu
 
 ## Project Overview
 
-Meal planning can be difficult because people have to balance nutrition goals, dietary restrictions, grocery budget, cooking time, and ingredient waste at the same time. A plan may look good nutritionally, but still be unrealistic if it is too expensive, takes too long to prepare, or requires buying many ingredients that are barely reused.
+Meal planning can be difficult because there are a lot of needs to balance across one week. A person may want to meet their nutrition goals while staying within a grocery budget. They may also have dietary restrictions, limited time to cook, or want to avoid buying ingredients that barely get used.
 
-For this project, we are building a system that generates a weekly meal plan using local search. Instead of choosing each meal individually, the system evaluates the full week together and searches for a plan that is both valid and realistic for the user.
+For this project, we are building a system that generates a weekly meal plan using local search. Rather than picking each meal separately, the system evaluates the full week as one plan. This allows it to search for a plan that fits the user's needs while still being realistic to follow.
 
 ## Problem Representation
 
-A single state is one complete weekly meal plan made up of 21 meal slots: breakfast, lunch, and dinner across 7 days. Each slot is filled with a recipe from a public recipe dataset.
+A single state is one complete weekly meal plan made up of 21 meal slots. Each day includes breakfast, lunch, and dinner, with each slot filled by a recipe from a public recipe dataset.
 
-A neighboring state will be created by making a small change to the current plan, such as replacing one meal with another recipe. This allows the search algorithms to gradually improve a plan rather than trying every possible combination of meals.
+A neighboring state is created by making a small change to the current plan. For example, the system may replace one meal with a different recipe. This gives the search algorithms a way to gradually improve a plan without trying every possible weekly combination.
 
 ## Constraints and Objective Function
 
-The system will score each weekly plan based on both hard constraints and softer preferences.
+The system will score each weekly meal plan based on required constraints and personal preferences.
 
-**Hard constraints may include:**
-- Daily calorie range
-- Allergen or dietary restrictions
-- Weekly grocery budget
+**Hard constraints:**
+- Staying within a daily calorie range
+- Avoiding allergens or restricted foods
+- Keeping the weekly grocery cost within budget
 
 **Soft goals may include:**
 - Staying close to macro targets
 - Reusing ingredients to reduce waste
-- Avoiding too much repetition
-- Keeping preparation time realistic
+- Avoiding too much repetition across the week
+- Keeping the amount of cooking time realistic
 
-A lower score will represent a better meal plan. Hard constraint violations will receive much larger penalties than soft goal issues so that the system prioritizes producing valid plans.
+A lower score will represent a stronger meal plan. Violations of hard constraints will receive much larger penalties than issues with soft goals. This ensures that the system first focuses on creating a valid plan, then tries to make that plan more practical and appealing.
 
 Our initial scoring structure is:
 
@@ -46,38 +46,39 @@ score(plan) =
 
 ## Search Algorithms
 
-We plan to implement and compare three search methods from scratch:
+We plan to implement and compare three search methods from scratch.
 
 ### Hill Climbing with Random Restarts
-Starts with a random meal plan and repeatedly accepts changes that improve the score. Random restarts help the algorithm try new starting points if it gets stuck.
+
+Hill climbing starts with a randomly generated meal plan and accepts changes that improve its score. If the algorithm gets stuck at a plan that cannot be improved with small changes, a random restart allows it to begin searching from a new starting point.
 
 ### Simulated Annealing
-Sometimes accepts a worse plan early in the search, which may help it move out of local optima and eventually find a stronger solution.
+
+Simulated annealing may accept a worse plan earlier in the search process. This can help it move away from a plan that seems good at first but prevents stronger improvements later on. As the search continues, the algorithm becomes more selective.
 
 ### Genetic Algorithm
-Starts with multiple meal plans and improves them through selection, crossover, and mutation. This allows the algorithm to explore different possible plans at the same time.
+
+The genetic algorithm starts with multiple possible meal plans instead of relying on one starting plan. Stronger plans are selected to help create new plans. The algorithm can combine sections of two plans or randomly change individual meals as it searches for better solutions.
 
 ## Dataset
 
 We are currently deciding on a public recipe dataset. Our options include Food.com Recipes, RecipeNLG, and USDA FoodData Central.
 
-The dataset should ideally provide:
+The dataset should ideally provide information about:
+
 - Calories and macronutrients
-- Ingredients
+- Ingredients included in each recipe
 - Preparation time
-- Dietary information
+- Dietary labels or restrictions
 - Cost information, if available
+
+If cost is not directly available in the selected dataset, we may need to simplify that part of the objective function or estimate costs using ingredient information.
 
 ## Evaluation Plan
 
-We will compare the three search algorithms based on:
+We will compare the three search algorithms by looking at the quality of the final meal plans they produce. We want to see whether each algorithm creates plans that satisfy the required constraints, reaches a strong objective score, and does so within a reasonable amount of time.
 
-- Final objective score
-- Constraint satisfaction rate
-- Runtime or convergence speed
-- Overall practicality of the generated plans
-
-Because local search results can depend on the initial starting point, we plan to run each algorithm multiple times and compare its overall performance.
+Because local search can produce different results depending on where it starts, we plan to run each algorithm multiple times. This will allow us to compare their performance more fairly rather than relying on one result from each method.
 
 ## Planned Repository Structure
 
@@ -96,15 +97,16 @@ cs4100-meal-planner/
 ## Current Progress
 
 - Created the GitHub repository
-- Finalized the project proposal and general approach
+- Finalized the project proposal
+- Defined the general approach for representing weekly meal plans
 - Identified possible recipe datasets
-- Selected the three local search methods to compare
-- Began outlining the objective function
+- Chosen the local search methods we plan to compare
+- Started outlining the objective function
 
 ## Next Steps
 
 - Choose the final recipe dataset
 - Finalize the objective function
 - Set up the project folder structure
-- Represent recipes and weekly meal plans in code
+- Create a code representation for recipes and weekly meal plans
 - Begin implementing hill climbing with random restarts
