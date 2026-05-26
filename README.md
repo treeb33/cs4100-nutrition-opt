@@ -1,4 +1,4 @@
-# Adaptive Meal Planner: Local Search for Weekly Meal Planning
+# Meal Planner: Local Search for Weekly Meal Planning
 
 ## CS4100 Final Project
 
