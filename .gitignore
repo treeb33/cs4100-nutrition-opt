@@ -3,3 +3,7 @@ __pycache__/
 .DS_Store
 .env
 *.ipynb_checkpoints
+data/*.csv
+data/*.pkl
+.venv/
+.vscode/
