@@ -1,3 +1,6 @@
+## AI assistance (Claude) was used to review code structure and 
+## suggest improvements to the single-run and multi-restart logic.
+
 """Hill climbing with random restarts for weekly meal plan optimization."""
 
 import random

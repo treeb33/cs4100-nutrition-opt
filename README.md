@@ -166,3 +166,6 @@ Hill climbing achieved the strongest mean score under equal iteration budgets. A
 - Maillot et al., "Nutrient profiling and linear programming for diet optimization," 2011.
 - Gao et al., "Meal planning using genetic algorithms," 2019.
 - Food.com Recipes dataset: https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions
+
+## AI Usage Acknoledgement
+AI assistance was used to generate the full README, including setup instructions, repository structure documentation, and the results summary table.
