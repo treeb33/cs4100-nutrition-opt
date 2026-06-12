@@ -31,7 +31,7 @@ The system will score each weekly meal plan based on required constraints and pe
 - Avoiding too much repetition across the week
 - Keeping the amount of cooking time realistic
 
-A lower score will represent a stronger meal plan. Violations of hard constraints will receive much larger penalties than issues with soft goals. This ensures that the system first focuses on creating a valid plan, then tries to make that plan more practical and appealing.
+A higher score will represent a stronger meal plan. Violations of hard constraints will receive much larger penalties than issues with soft goals. This ensures that the system first focuses on creating a valid plan, then tries to make that plan more practical and appealing.
 
 Our initial scoring structure is:
 

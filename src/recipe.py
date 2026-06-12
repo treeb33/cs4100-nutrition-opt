@@ -34,8 +34,12 @@ def _parse_list(raw: str) -> tuple[str, ...]:
     except (ValueError, SyntaxError):
         return ()
 
-
-def load_recipes(csv_path: str | Path, max_minutes: int | None = None) -> list[Recipe]:
+# added time constraint to reduce dataset to ~100K recipes
+def load_recipes(
+    csv_path: str | Path,
+    min_minutes: int | None = 5,
+    max_minutes: int | None = 35,
+) -> list[Recipe]:
     """Load recipes from the Food.com RAW_recipes.csv export.
 
     The `nutrition` column is a stringified 7-element list:
@@ -45,8 +49,14 @@ def load_recipes(csv_path: str | Path, max_minutes: int | None = None) -> list[R
     objective function should either work in PDV consistently or convert
     to grams up front -- flagging this so it doesn't silently bite us.
 
-    Pass `max_minutes` to drop recipes that take too long to cook, which
-    keeps the search space smaller and more realistic.
+    Filters (defaults chosen to cut the raw ~231k down to ~108k):
+      - `min_minutes` drops zero-minute data-error rows and assembly-only
+        "recipes" that don't represent real meals.
+      - `max_minutes` caps cook time so the search space stays realistic
+        for weekly meal planning; 35 keeps recipes that fit a weeknight.
+
+    Pass `None` for either filter to disable it (useful for inspecting
+    the full raw distribution).
     """
     df = pd.read_csv(csv_path)
     recipes: list[Recipe] = []
@@ -72,6 +82,8 @@ def load_recipes(csv_path: str | Path, max_minutes: int | None = None) -> list[R
             ingredients=_parse_list(row.ingredients),
             tags=_parse_list(row.tags),
         )
+        if min_minutes is not None and recipe.minutes < min_minutes:
+            continue
         if max_minutes is not None and recipe.minutes > max_minutes:
             continue
         recipes.append(recipe)
