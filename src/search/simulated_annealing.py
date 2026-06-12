@@ -7,7 +7,8 @@ import random
 from src.meal_plan import MealPlan
 from src.evaluation.objective import score_plan
 
-
+### AI CITATION: used Gen AI to give an estimate of initial values, then modified 
+### and refined accordingly
 def simulated_annealing(
     pool,
     user_prefs,
@@ -29,6 +30,8 @@ def simulated_annealing(
 
     returns (best_plan, best_score).
     """
+    ### AI CITATION: Used AI and other resources to understand and implement the random seed
+    ### and to figure out how to make results reproducible
     if rng is None:
         rng = random.Random()
 

@@ -1,4 +1,5 @@
-"""comparison harness for the three local search algorithms.
+"""
+comparison harness for the three local search algorithms.
 
 drives hill climbing, simulated annealing, genetic search on the same
 pool / prefs / seeds and reports solution quality, convergence speed, wall-clock, and
@@ -58,11 +59,12 @@ def _run_one(
     seed: int,
     **kwargs,
 ) -> RunResult:
-    """r
-    un a single algorithm with a seeded RNG and time it.
+    """
+    run a single algorithm with a seeded RNG and time it.
 
-    all three algorithms share the (pool, user_prefs, rng=...) signature
-    so the harness can drive them through one call shape.
+    all three algorithms share the (pool, user_prefs, rng=...) so they are
+    driven through the same 'shape' - this makes it possible to compare
+    the three algorithms accurately.
     """
     rng = random.Random(seed)
     t0 = time.perf_counter()
@@ -85,11 +87,6 @@ def compare_algorithms(
     sa_kwargs: dict | None = None,
     ga_kwargs: dict | None = None,
 ) -> dict[str, AlgoSummary]:
-    """
-    run all three algorithms across the same seed list, return a summary
-    per algorithm. Per-algorithm kwargs let the caller match comparable
-    compute budgets (e.g. roughly equal total neighbor evaluations).
-    """
     hc_kwargs = hc_kwargs or {"n_restarts": 5, "max_steps": 1000}
     sa_kwargs = sa_kwargs or {"n_runs": 5, "max_steps": 1000}
     ga_kwargs = ga_kwargs or {"pop_size": 30, "n_generations": 50}

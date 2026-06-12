@@ -10,7 +10,7 @@ def hill_climb(pool, user_prefs, rng=None, max_steps=1000):
     single hill climbing run from a random start.
     
     tt each step sample one neighbor (single meal swap) and keeps it
-    if it improves the score. Stops when no improvement or max_steps hit.
+    if it improves the score. 
     
     returns (best_plan, best_score).
     """
@@ -47,7 +47,7 @@ def hill_climb_with_restarts(pool, user_prefs, rng=None, n_restarts=10, max_step
 
     for i in range(n_restarts):
         plan, score = hill_climb(pool, user_prefs, rng=rng, max_steps=max_steps)
-        print(f"  Restart {i+1}/{n_restarts}: score = {score:.4f}")
+        print(f"restart {i+1}/{n_restarts}: score = {score:.4f}")
         if score > best_score:
             best_score = score
             best_plan = plan
@@ -56,10 +56,9 @@ def hill_climb_with_restarts(pool, user_prefs, rng=None, n_restarts=10, max_step
 
 
 if __name__ == "__main__":
-    # Smoke test with dummy scorer (objective.py is still a stub)
     from src.recipe import load_recipes
 
-    # Mock user prefs
+    # mock user prefs
     user_prefs = {
         "calorie_target": 2000,
         "budget": 100,

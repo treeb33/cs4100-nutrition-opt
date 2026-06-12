@@ -114,7 +114,7 @@ def curate_pool(
     ceiling, and the 200 kcal floor prevents underfeeding.
 
     Returns up to `target_size` recipes (slightly fewer if target_size
-    doesn't divide evenly across bins, or if a bin is underpopulated).
+    doesn't divide evenly across bins or if a bin is underpopulated).
     """
     rng = rng or random.Random()
     in_range = [r for r in recipes if min_calories <= r.calories <= max_calories]
