@@ -4,109 +4,165 @@
 
 **Team Members:** Sanah Menon, Isabella Pozzi, Triya Basu
 
-## Project Overview
+---
 
-Meal planning can be difficult because there are a lot of needs to balance across one week. A person may want to meet their nutrition goals while staying within a grocery budget. They may also have dietary restrictions, limited time to cook, or want to avoid buying ingredients that barely get used.
+## Overview
 
-For this project, we are building a system that generates a weekly meal plan using local search. Rather than picking each meal separately, the system evaluates the full week as one plan. This allows it to search for a plan that fits the user's needs while still being realistic to follow.
+Meal planning requires balancing competing constraints across a full week: nutritional targets, dietary restrictions, ingredient reuse, cooking time, and recipe variety. This project treats weekly meal planning as a constrained optimization problem and solves it by implementing and comparing three local search algorithms from scratch: hill climbing with random restarts, simulated annealing, and a genetic algorithm.
 
-## Problem Representation
+Each algorithm searches over a space of 21-slot weekly meal plans (7 days × 3 meals) drawn from a curated recipe pool, optimizing a shared objective function that combines hard constraints and weighted soft goals.
 
-A single state is one complete weekly meal plan made up of 21 meal slots. Each day includes breakfast, lunch, and dinner, with each slot filled by a recipe from a public recipe dataset.
+---
 
-A neighboring state is created by making a small change to the current plan. For example, the system may replace one meal with a different recipe. This gives the search algorithms a way to gradually improve a plan without trying every possible weekly combination.
-
-## Constraints and Objective Function
-
-The system will score each weekly meal plan based on required constraints and personal preferences.
-
-**Hard constraints:**
-- Staying within a daily calorie range
-- Avoiding allergens or restricted foods
-- Keeping the weekly grocery cost within budget
-
-**Soft goals may include:**
-- Staying close to macro targets
-- Reusing ingredients to reduce waste
-- Avoiding too much repetition across the week
-- Keeping the amount of cooking time realistic
-
-A higher score will represent a stronger meal plan. Violations of hard constraints will receive much larger penalties than issues with soft goals. This ensures that the system first focuses on creating a valid plan, then tries to make that plan more practical and appealing.
-
-Our initial scoring structure is:
+## Repository Structure
 
 ```text
-score(plan) =
-    hard_constraint_penalties
-    + macro_deviation_penalty
-    + ingredient_waste_penalty
-    + repetition_penalty
-    + preparation_time_penalty
-```
-
-## Search Algorithms
-
-We plan to implement and compare three search methods from scratch.
-
-### Hill Climbing with Random Restarts
-
-Hill climbing starts with a randomly generated meal plan and accepts changes that improve its score. If the algorithm gets stuck at a plan that cannot be improved with small changes, a random restart allows it to begin searching from a new starting point.
-
-### Simulated Annealing
-
-Simulated annealing may accept a worse plan earlier in the search process. This can help it move away from a plan that seems good at first but prevents stronger improvements later on. As the search continues, the algorithm becomes more selective.
-
-### Genetic Algorithm
-
-The genetic algorithm starts with multiple possible meal plans instead of relying on one starting plan. Stronger plans are selected to help create new plans. The algorithm can combine sections of two plans or randomly change individual meals as it searches for better solutions.
-
-## Dataset
-
-We are currently deciding on a public recipe dataset. Our options include Food.com Recipes, RecipeNLG, and USDA FoodData Central.
-
-The dataset should ideally provide information about:
-
-- Calories and macronutrients
-- Ingredients included in each recipe
-- Preparation time
-- Dietary labels or restrictions
-- Cost information, if available
-
-If cost is not directly available in the selected dataset, we may need to simplify that part of the objective function or estimate costs using ingredient information.
-
-## Evaluation Plan
-
-We will compare the three search algorithms by looking at the quality of the final meal plans they produce. We want to see whether each algorithm creates plans that satisfy the required constraints, reaches a strong objective score, and does so within a reasonable amount of time.
-
-Because local search can produce different results depending on where it starts, we plan to run each algorithm multiple times. This will allow us to compare their performance more fairly rather than relying on one result from each method.
-
-## Planned Repository Structure
-
-```text
-cs4100-meal-planner/
+cs4100-nutrition-opt/
 ├── data/
+│   └── RAW_recipes.csv          # Food.com recipe dataset (download separately)
 ├── src/
+│   ├── recipe.py                # Recipe dataclass, load_recipes(), curate_pool()
+│   ├── meal_plan.py             # MealPlan state, random init, neighbor generation
+│   ├── evaluation/
+│   │   ├── objective.py         # score_plan(), is_feasible(), hard + soft scoring
+│   │   └── experiments.py       # compare_algorithms() harness, print_comparison_table()
 │   ├── search/
-│   └── evaluation/
-├── notebooks/
+│   │   ├── hill_climbing.py     # hill_climb(), hill_climb_with_restarts()
+│   │   ├── simulated_annealing.py  # simulated_annealing(), simulated_annealing_multi()
+│   │   └── genetic.py           # run_genetic() with tournament selection + crossover
+│   └── experiments/
+│       └── run_experiments.py   # Reproduces all results and saves plots to results/
 ├── tests/
+│   ├── test_meal_plan.py
+│   ├── test_objective.py
+│   └── test_search_api.py
+├── results/                     # Generated plots saved here
 ├── requirements.txt
 └── README.md
 ```
 
-## Current Progress
+---
 
-- Created the GitHub repository
-- Finalized the project proposal
-- Defined the general approach for representing weekly meal plans
-- Identified possible recipe datasets
-- Chosen the local search methods we plan to compare
-- Started outlining the objective function
+## Setup
 
-## Next Steps
+**1. Clone the repository**
+```bash
+git clone https://github.com/treeb33/cs4100-nutrition-opt.git
+cd cs4100-nutrition-opt
+```
 
-- Choose the final recipe dataset
-- Finalize the objective function
-- Set up the project folder structure
-- Create a code representation for recipes and weekly meal plans
-- Begin implementing hill climbing with random restarts
+**2. Create and activate a virtual environment**
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+
+**3. Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+**4. Download the dataset**
+
+Download `RAW_recipes.csv` from the [Food.com Recipes dataset on Kaggle](https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions) and place it in the `data/` directory.
+
+---
+
+## Reproducing Results
+
+Run the full experiment pipeline from the repo root:
+
+```bash
+python -m src.experiments.run_experiments --csv data/RAW_recipes.csv
+```
+
+This will:
+- Load and curate a pool of 400 recipes from the dataset
+- Run all three algorithms across 5 fixed random seeds (42, 7, 100, 2024, 31)
+- Print a summary table of mean score, std, and feasibility rate per algorithm
+- Save three plots to `results/`:
+  - `convergence.png` — best score per iteration for each algorithm
+  - `best_scores.png` — mean best score ± std across seeds
+  - `constraint_satisfaction.png` — feasibility rate per algorithm
+
+**Optional flags:**
+```bash
+--pool-size 400       # number of recipes to sample (default: 400)
+--seeds 42 7 100      # which random seeds to use
+--hc-steps 500        # hill climbing steps per restart (default: 500)
+--sa-steps 500        # simulated annealing steps per run (default: 500)
+--ga-gens 50          # genetic algorithm generations (default: 50)
+--n-restarts 5        # restarts for HC / runs for SA (default: 5)
+```
+
+---
+
+## Running Tests
+
+```bash
+pytest tests/
+```
+
+---
+
+## Problem Representation
+
+A **state** is a `MealPlan`: a list of 21 recipe indices (7 days × 3 meals) into a shared recipe pool. Storing indices rather than full recipe objects makes states cheap to copy and compare.
+
+A **neighbor** is generated by swapping one randomly chosen meal slot to a different recipe. This single-swap move is the shared primitive across all three search algorithms.
+
+---
+
+## Objective Function
+
+`score_plan(plan, pool, user_prefs)` returns a scalar score — higher is better.
+
+**Hard constraints** (large penalty if violated):
+- Each day must fall within a sane calorie range
+- No allergen-containing recipes if allergens are specified
+- Average daily sodium PDV must stay within the limit
+
+Hard violations return a graded penalty (`-HARD_PENALTY - severity`) so the search has a gradient pointing toward feasibility rather than a flat cliff.
+
+**Soft goals** (weighted penalties/rewards):
+- Stay close to daily calorie target
+- Meet macro targets (protein, fat, carbohydrates)
+- Minimize sugar overage
+- Reward ingredient reuse across the week
+- Penalize recipe repetition
+- Penalize recipes that exceed the max prep time
+
+---
+
+## Algorithms
+
+### Hill Climbing with Random Restarts
+Greedy local search: at each step, sample one neighbor and keep it if it improves the score. Repeat from a new random start after each run to escape local optima.
+
+### Simulated Annealing
+Probabilistic escape from local optima: accept worse moves with probability `exp(ΔE/T)`, where `T` cools geometrically. Tracks the best-seen plan separately from the current plan so late-stage exploration doesn't lose progress.
+
+### Genetic Algorithm
+Population-based search: tournament selection picks parents, single-point crossover combines meal slots, and random mutation swaps individual slots with a fixed probability. Elitism preserves the best plan each generation.
+
+---
+
+## Key Results
+
+All three algorithms were evaluated across 5 seeds on a curated pool of 400 recipes. Higher scores (closer to zero) are better.
+
+| Algorithm | Score (mean ± std) | Time (s) | Feasibility |
+|---|---|---|---|
+| Hill Climbing | -1.288 ± 0.154 | 0.03 | 100% |
+| Simulated Annealing | -2.590 ± 0.362 | 0.03 | 100% |
+| Genetic Algorithm | -2.092 ± 0.181 | 0.01 | 100% |
+
+Hill climbing achieved the strongest mean score under equal iteration budgets. All three algorithms satisfied hard constraints on every seed.
+
+---
+
+## References
+
+- Maillot et al., "Nutrient profiling and linear programming for diet optimization," 2011.
+- Gao et al., "Meal planning using genetic algorithms," 2019.
+- Food.com Recipes dataset: https://www.kaggle.com/datasets/shuyangli94/food-com-recipes-and-user-interactions
