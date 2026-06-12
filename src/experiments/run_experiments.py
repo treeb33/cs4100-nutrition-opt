@@ -13,6 +13,7 @@ Plots saved to results/:
     best_scores.png           — mean best score ± std across seeds
     constraint_satisfaction.png — feasibility rate per algorithm
 """
+### General Citation: Used Gen AI to document, organize, and debug
 from __future__ import annotations
 
 import argparse

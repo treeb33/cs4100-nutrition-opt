@@ -7,7 +7,9 @@ import random
 from src.meal_plan import MealPlan
 from src.evaluation.objective import score_plan
 
-
+### General Citation: Used Gen AI to document, organize, and debug
+### AI CITATION: Used Gen AI to debug hard penalty constraint - had issue with getting
+### all algorithms to escape plateau of hard penalty
 def simulated_annealing(
     pool,
     user_prefs,

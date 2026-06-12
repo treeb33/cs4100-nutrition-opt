@@ -11,6 +11,8 @@ import pandas as pd
 ### AI CITATION: used Gen AI + documentation to understand how to parse files and data.
 ### used AI to suggest methods for cleaning the data and cutting it down to the intended
 ### number of recipes according to our project plan.
+
+### General Citation: Used Gen AI to document, organize, and debug
 @dataclass(frozen=True)
 class Recipe:
     id: int

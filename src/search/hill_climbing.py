@@ -7,7 +7,7 @@ import random
 from src.meal_plan import MealPlan
 from src.evaluation.objective import score_plan
 
-
+### General Citation: Used Gen AI to document, organize, and debug
 def hill_climb(pool, user_prefs, rng=None, max_steps=1000):
     """
     single hill climbing run from a random start.

@@ -12,7 +12,7 @@ DAYS = 7
 MEALS_PER_DAY = 3                  # breakfast, lunch, dinner
 NUM_SLOTS = DAYS * MEALS_PER_DAY   # 21
 
-
+### General Citation: Used Gen AI to document, organize, and debug
 @dataclass
 class MealPlan:
     """a full week as one state: 21 recipe slots.
