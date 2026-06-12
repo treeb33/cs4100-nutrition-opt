@@ -1,4 +1,4 @@
-"""Weekly meal plan state and neighbor generation for local search."""
+"""weekly meal plan state and neighbor generation for local search."""
 from __future__ import annotations
 
 import random

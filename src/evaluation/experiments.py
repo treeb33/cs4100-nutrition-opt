@@ -4,6 +4,9 @@ drives hill climbing, simulated annealing, genetic search on the same
 pool / prefs / seeds and reports solution quality, convergence speed, wall-clock, and
 constraint satisfaction rate.
 """
+
+### CITATION: used Gen AI and other online resources for syntax / package / documentation
+### understanding and purposes.
 from __future__ import annotations
 
 import random
@@ -55,7 +58,8 @@ def _run_one(
     seed: int,
     **kwargs,
 ) -> RunResult:
-    """run a single algorithm with a seeded RNG and time it.
+    """r
+    un a single algorithm with a seeded RNG and time it.
 
     all three algorithms share the (pool, user_prefs, rng=...) signature
     so the harness can drive them through one call shape.
@@ -101,11 +105,11 @@ def compare_algorithms(
         print(f"\n=== {name} ===")
         runs = []
         for seed in seeds:
-            print(f"  seed={seed} ...", end="", flush=True)
+            print(f"seed={seed} ...", end="", flush=True)
             result = _run_one(algo_fn, pool, user_prefs, seed, **kwargs)
             runs.append(result)
             print(
-                f" score={result.score:.4f} "
+                f"score={result.score:.4f} "
                 f"time={result.elapsed_s:.2f}s "
                 f"feasible={result.feasible}"
             )
@@ -113,9 +117,10 @@ def compare_algorithms(
 
     return summaries
 
-
+### AI CITATION: used Gen AI to produce an elegant representation of our results - 
+### suggest which metrics to compare to best represent the data
 def print_comparison_table(summaries: dict[str, AlgoSummary]) -> None:
-    """Render a compact comparison table to stdout."""
+    """render a comparison table"""
     header = f"{'algorithm':<22} {'score (mean ± std)':<28} {'time (s)':<12} {'feasibility':<12}"
     print("\n" + header)
     print("-" * len(header))
@@ -128,13 +133,16 @@ def print_comparison_table(summaries: dict[str, AlgoSummary]) -> None:
 
 
 if __name__ == "__main__":
-    # Small comparison run:
+    # small comparison run:
     #   python -m src.evaluation.experiments
-    # Tune n_seeds / step counts via the kwargs below for a longer run.
-    from src.recipe import load_recipes
+    # tune n_seeds / step counts via the kwargs below for a longer run.
+    from src.recipe import curate_pool, load_recipes
 
-    pool = load_recipes("data/RAW_recipes.csv")
-    print(f"Loaded {len(pool)} recipes")
+    raw = load_recipes("data/RAW_recipes.csv")
+    print(f"Loaded {len(raw)} recipes")
+    # curated pool for ~400 recipes
+    pool = curate_pool(raw, target_size=400, rng=random.Random(0))
+    print(f"Curated pool: {len(pool)} recipes")
 
     user_prefs = {"calorie_target": 2000, "allergens": []}
     seeds = [42, 7, 100, 2024, 31]

@@ -40,13 +40,14 @@ def _day_recipes(plan: MealPlan, pool: list, d: int) -> list:
 
 
 def _hard_violation_severity(plan: MealPlan, pool: list, prefs: dict, recipes: list) -> float:
-    """Return 0.0 if the plan is feasible, otherwise a positive scalar
+    """
+    return 0.0 if the plan is feasible, otherwise a positive scalar
     proportional to how badly the hard constraints are violated.
 
     A flat hard penalty makes ~99.8% of random starts identical from the
     search's point of view, so SA and hill climbing have no gradient out
     of the infeasible region. Grading the penalty by severity gives the
-    search a smooth signal that points toward feasibility.
+    search a smooth signal that points toward feasibility
     """
     severity = 0.0
 
@@ -56,7 +57,7 @@ def _hard_violation_severity(plan: MealPlan, pool: list, prefs: dict, recipes: l
             if any(a in ing for a in allergens for ing in r.ingredients):
                 severity += 1.0   # one full unit per allergen-containing recipe
 
-    # per-day calorie range, normalized by the 1000 kcal band width
+    # per day calorie range, normalized by 1000 kcal limit
     for d in range(DAYS):
         kcal = sum(r.calories for r in _day_recipes(plan, pool, d))
         if kcal < 1000:
@@ -75,7 +76,7 @@ def _hard_violation_severity(plan: MealPlan, pool: list, prefs: dict, recipes: l
 def _soft_score(plan: MealPlan, pool: list, prefs: dict, recipes: list) -> float:
     score = 0.0
 
-    # penalize days that land outside the calorie tolerance band
+    # penalize days that land outside the calorie tolerance range
     for d in range(DAYS):
         kcal = sum(r.calories for r in _day_recipes(plan, pool, d))
         overage = abs(kcal - prefs["calorie_target"]) - prefs["calorie_tolerance"]
@@ -140,9 +141,10 @@ def score_plan(plan: MealPlan, pool: list, user_prefs: dict) -> float:
 
 
 def is_feasible(plan: MealPlan, pool: list, user_prefs: dict) -> bool:
-    """True iff the plan satisfies every hard constraint.
+    """
+    true iff the plan satisfies every hard constraint.
 
-    Used by the experiments harness to measure each algorithm's
+    used by the experiments harness to measure each algorithm's
     constraint-satisfaction rate across seeds.
     """
     prefs = {**DEFAULT_PREFS, **user_prefs}

@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import ast
+import random
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import pandas as pd
 
-
+### AI CITATION: used Gen AI + documentation to understand how to parse files and data.
+### used AI to suggest methods for cleaning the data and cutting it down to the intended
+### number of recipes according to our project plan.
 @dataclass(frozen=True)
 class Recipe:
     id: int
@@ -90,10 +93,56 @@ def load_recipes(
     return recipes
 
 
+def curate_pool(
+    recipes: list[Recipe],
+    target_size: int = 400,
+    min_calories: float = 200.0,
+    max_calories: float = 900.0,
+    n_bins: int = 5,
+    rng: random.Random | None = None,
+) -> list[Recipe]:
+    """stratified-sample a small curated pool from a large recipe list.
+
+    Since we settled on a pool of 200-400 recipes for our project plan; 
+    the time filter alone leaves ~100k. Sample across calorie bins so the pool can hit
+    the ~2000 kcal daily target with 3 recipes per day, rather than
+    overrepresenting any one calorie band.
+
+    The narrower [min_calories, max_calories] window also raises the
+    base rate of feasible random plans dramatically: capping per-recipe
+    calories at 900 keeps any 3-recipe day under the 4000 kcal hard
+    ceiling, and the 200 kcal floor prevents underfeeding.
+
+    Returns up to `target_size` recipes (slightly fewer if target_size
+    doesn't divide evenly across bins, or if a bin is underpopulated).
+    """
+    rng = rng or random.Random()
+    in_range = [r for r in recipes if min_calories <= r.calories <= max_calories]
+    if not in_range:
+        return []
+
+    band_width = (max_calories - min_calories) / n_bins
+    bins: dict[int, list[Recipe]] = {i: [] for i in range(n_bins)}
+    for r in in_range:
+        idx = min(int((r.calories - min_calories) / band_width), n_bins - 1)
+        bins[idx].append(r)
+
+    per_bin = target_size // n_bins
+    pool: list[Recipe] = []
+    for b in bins.values():
+        if len(b) <= per_bin:
+            pool.extend(b)
+        else:
+            pool.extend(rng.sample(b, per_bin))
+    return pool
+
+
 if __name__ == "__main__":
     # Smoke test: python recipe.py ../data/RAW_recipes.csv
     import sys
 
     recipes = load_recipes(sys.argv[1])
     print(f"Loaded {len(recipes)} recipes")
+    curated = curate_pool(recipes, rng=random.Random(0))
+    print(f"Curated pool: {len(curated)} recipes")
     print(recipes[0])

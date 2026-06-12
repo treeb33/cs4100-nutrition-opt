@@ -51,3 +51,42 @@ def test_seeded_rng_is_reproducible():
     plan_a = MealPlan.random(pool_size=200, rng=random.Random(42))
     plan_b = MealPlan.random(pool_size=200, rng=random.Random(42))
     assert plan_a.slots == plan_b.slots
+
+
+def _calorie_recipe(rid: int, calories: float):
+    from src.recipe import Recipe
+    return Recipe(
+        id=rid, name=f"r{rid}", minutes=20, calories=calories,
+        fat_pdv=20.0, sugar_pdv=15.0, sodium_pdv=15.0,
+        protein_pdv=25.0, sat_fat_pdv=8.0, carbs_pdv=35.0,
+        ingredients=("x",), tags=(),
+    )
+
+
+def test_curate_pool_targets_roughly_400():
+    from src.recipe import curate_pool
+    # 10k recipes spread evenly across the calorie window
+    rng = random.Random(0)
+    recipes = [_calorie_recipe(i, 200 + (i % 700)) for i in range(10_000)]
+    curated = curate_pool(recipes, target_size=400, n_bins=5, rng=rng)
+    # per_bin = 80, 5 bins => 400 when bins are well-populated
+    assert 350 <= len(curated) <= 400
+
+
+def test_curate_pool_filters_to_calorie_window():
+    from src.recipe import curate_pool
+    recipes = (
+        [_calorie_recipe(i, 100) for i in range(50)]      # below floor
+        + [_calorie_recipe(50 + i, 500) for i in range(500)]   # inside
+        + [_calorie_recipe(550 + i, 5000) for i in range(50)]  # above ceiling
+    )
+    curated = curate_pool(recipes, target_size=200, rng=random.Random(0))
+    assert all(200 <= r.calories <= 900 for r in curated)
+
+
+def test_curate_pool_is_seed_reproducible():
+    from src.recipe import curate_pool
+    recipes = [_calorie_recipe(i, 200 + (i % 700)) for i in range(2000)]
+    a = curate_pool(recipes, target_size=200, rng=random.Random(7))
+    b = curate_pool(recipes, target_size=200, rng=random.Random(7))
+    assert [r.id for r in a] == [r.id for r in b]
