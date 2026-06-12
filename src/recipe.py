@@ -34,7 +34,7 @@ def _parse_list(raw: str) -> tuple[str, ...]:
     except (ValueError, SyntaxError):
         return ()
 
-
+# added time constraint to reduce dataset to ~100K recipes
 def load_recipes(
     csv_path: str | Path,
     min_minutes: int | None = 5,

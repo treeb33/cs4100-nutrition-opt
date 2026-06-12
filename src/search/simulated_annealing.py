@@ -1,4 +1,4 @@
-"""Simulated annealing for weekly meal plan optimization."""
+"""simulated annealing for weekly meal plan optimization."""
 from __future__ import annotations
 
 import math
@@ -17,16 +17,17 @@ def simulated_annealing(
     cooling_rate: float = 0.995,
     min_temp: float = 1e-4,
 ):
-    """Single simulated annealing run from a random start.
+    """
+    single simulated annealing run from a random start.
 
-    At each step, sample one neighbor (single meal swap). Always accept
+    at each step, sample one neighbor (e.g. single meal swap). always accept
     improvements; accept worse moves with probability exp(delta / T),
-    where delta is negative. T cools geometrically each step.
+    where delta is negative. temperature cools at each step.
 
-    The "best ever seen" plan is tracked separately from the current plan,
+    The 'best seen so far' plan is tracked separately from the current plan,
     so accepting a worse move late in the schedule doesn't lose progress.
 
-    Returns (best_plan, best_score).
+    returns (best_plan, best_score).
     """
     if rng is None:
         rng = random.Random()
@@ -39,16 +40,21 @@ def simulated_annealing(
 
     temp = initial_temp
     for _ in range(max_steps):
+        # once we reach min temp, more steps won't do anything useful so exit
         if temp < min_temp:
             break
-
+        
+        # take one candidate (meal swap) and check whether it is better or worse
         neighbor = current.neighbor(pool_size=len(pool), rng=rng)
         neighbor_score = score_plan(neighbor, pool, user_prefs)
         delta = neighbor_score - current_score
 
+        # improvements accepted unconditionally + short circuits
+        # only check delta / temp when delta is 0 or negative
         if delta > 0 or rng.random() < math.exp(delta / temp):
             current = neighbor
             current_score = neighbor_score
+            # update the best so far tracker if this score is better
             if current_score > best_score:
                 best_score = current_score
                 best_plan = current
@@ -68,12 +74,14 @@ def simulated_annealing_multi(
     cooling_rate: float = 0.995,
     min_temp: float = 1e-4,
 ):
-    """Run simulated_annealing n_runs times, return the best overall.
+    """
+    run simulated_annealing n_runs times and return the best overall.
 
-    Mirrors hill_climb_with_restarts so the experiment harness can drive
-    both algorithms with the same shape of call.
+    rng threading for evaluation plan - seeded random.Random through every
+    random choice means given seed reproduces exact same run - good for comparison
+    of algorithms.
 
-    Returns (best_plan, best_score).
+    returns (best_plan, best_score).
     """
     if rng is None:
         rng = random.Random()
@@ -91,7 +99,7 @@ def simulated_annealing_multi(
             cooling_rate=cooling_rate,
             min_temp=min_temp,
         )
-        print(f"  Run {i + 1}/{n_runs}: score = {score:.4f}")
+        print(f"run {i + 1}/{n_runs}: score = {score:.4f}")
         if score > best_score:
             best_score = score
             best_plan = plan
@@ -118,5 +126,5 @@ if __name__ == "__main__":
     plan, score = simulated_annealing_multi(
         pool, user_prefs, rng=rng, n_runs=3, max_steps=2000
     )
-    print(f"\nBest score: {score:.4f}")
-    print(f"Best plan slots: {plan.slots}")
+    print(f"\nbest score: {score:.4f}")
+    print(f"best plan slots: {plan.slots}")
