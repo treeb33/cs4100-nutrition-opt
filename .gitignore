@@ -6,4 +6,4 @@ __pycache__/
 data/*.csv
 data/*.pkl
 .venv/
-.vscode/
+.vscode/venv/
