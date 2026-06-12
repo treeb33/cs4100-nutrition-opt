@@ -13,7 +13,7 @@ NUM_SLOTS = DAYS * MEALS_PER_DAY
 HARD_PENALTY = 1e6
 
 # default targets and weights shared across all three search algorithms
-# NOTE: macros are in PDV to match how Recipe stores them, calories is raw kcal
+# NOTE: macros are in percent daily value to match how Recipe stores them, calories is raw kcal
 DEFAULT_PREFS = {
     "calorie_target":    2000,
     "calorie_tolerance": 200,
@@ -39,31 +39,44 @@ def _day_recipes(plan: MealPlan, pool: list, d: int) -> list:
     return [pool[i] for i in plan.day(d)]
 
 
-def _hard_constraints_violated(plan: MealPlan, pool: list, prefs: dict, recipes: list) -> bool:
-    # kick out any plan with a blacklisted ingredient immediately
+def _hard_violation_severity(plan: MealPlan, pool: list, prefs: dict, recipes: list) -> float:
+    """
+    return 0.0 if the plan is feasible, otherwise a positive scalar
+    proportional to how badly the hard constraints are violated.
+
+    A flat hard penalty makes ~99.8% of random starts identical from the
+    search's point of view, so SA and hill climbing have no gradient out
+    of the infeasible region. Grading the penalty by severity gives the
+    search a smooth signal that points toward feasibility
+    """
+    severity = 0.0
+
     allergens = [a.lower().strip() for a in prefs["allergens"]]
     if allergens:
         for r in recipes:
             if any(a in ing for a in allergens for ing in r.ingredients):
-                return True
+                severity += 1.0   # one full unit per allergen-containing recipe
 
-    # each day needs to be within a sane calorie range
+    # per day calorie range, normalized by 1000 kcal limit
     for d in range(DAYS):
         kcal = sum(r.calories for r in _day_recipes(plan, pool, d))
-        if not (1000 <= kcal <= 4000):
-            return True
+        if kcal < 1000:
+            severity += (1000 - kcal) / 1000
+        elif kcal > 4000:
+            severity += (kcal - 4000) / 1000
 
-    # hard sodium cap — average daily PDV can't exceed the limit
-    if sum(r.sodium_pdv for r in recipes) / DAYS > prefs["sodium_limit"]:
-        return True
+    # average daily sodium PDV cap, normalized by the limit
+    avg_sodium = sum(r.sodium_pdv for r in recipes) / DAYS
+    if avg_sodium > prefs["sodium_limit"]:
+        severity += (avg_sodium - prefs["sodium_limit"]) / prefs["sodium_limit"]
 
-    return False
+    return severity
 
 
 def _soft_score(plan: MealPlan, pool: list, prefs: dict, recipes: list) -> float:
     score = 0.0
 
-    # penalize days that land outside the calorie tolerance band
+    # penalize days that land outside the calorie tolerance range
     for d in range(DAYS):
         kcal = sum(r.calories for r in _day_recipes(plan, pool, d))
         overage = abs(kcal - prefs["calorie_target"]) - prefs["calorie_tolerance"]
@@ -112,11 +125,28 @@ def score_plan(plan: MealPlan, pool: list, user_prefs: dict) -> float:
     pool: list of Recipe objects
     user_prefs: dict with keys like calorie_target, allergens, etc.
     Returns a scalar score — higher is better.
+
+    Infeasible plans score -HARD_PENALTY minus a graded severity term, so
+    the search still has a gradient pointing toward the feasible region.
+    Any feasible plan scores strictly better than any infeasible one.
     """
     prefs = {**DEFAULT_PREFS, **user_prefs}
     recipes = plan.recipes(pool)
 
-    if _hard_constraints_violated(plan, pool, prefs, recipes):
-        return -HARD_PENALTY
+    severity = _hard_violation_severity(plan, pool, prefs, recipes)
+    if severity > 0:
+        return -HARD_PENALTY - severity
 
     return _soft_score(plan, pool, prefs, recipes)
+
+
+def is_feasible(plan: MealPlan, pool: list, user_prefs: dict) -> bool:
+    """
+    true iff the plan satisfies every hard constraint.
+
+    used by the experiments harness to measure each algorithm's
+    constraint-satisfaction rate across seeds.
+    """
+    prefs = {**DEFAULT_PREFS, **user_prefs}
+    recipes = plan.recipes(pool)
+    return _hard_violation_severity(plan, pool, prefs, recipes) == 0

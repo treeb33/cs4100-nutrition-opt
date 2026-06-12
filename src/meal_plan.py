@@ -1,4 +1,4 @@
-"""Weekly meal plan state and neighbor generation for local search."""
+"""weekly meal plan state and neighbor generation for local search."""
 from __future__ import annotations
 
 import random
@@ -15,11 +15,10 @@ NUM_SLOTS = DAYS * MEALS_PER_DAY   # 21
 
 @dataclass
 class MealPlan:
-    """A full week as one state: 21 recipe slots.
+    """a full week as one state: 21 recipe slots.
 
-    Slots store indices into a shared recipe pool (not Recipe objects), so
-    states are cheap to copy, hash, and compare. All three search algorithms
-    operate on this same representation.
+    slots store indices into a shared recipe pool (not Recipe objects), so
+    states are easier to compare. 
     """
     slots: list[int]   # length 21; each entry is an index into the recipe pool
 
@@ -29,11 +28,11 @@ class MealPlan:
         return cls(slots=[r.randrange(pool_size) for _ in range(NUM_SLOTS)])
 
     def neighbor(self, pool_size: int, rng: random.Random | None = None) -> "MealPlan":
-        """Return a NEW plan differing by exactly one meal.
+        """return a NEW plan differing by exactly one meal.
 
-        This single-swap move is the shared primitive:
+        single-swap move is the shared primitive:
           - hill climbing scans these and keeps the best improving one
-          - simulated annealing samples one and accepts probabilistically
+          - simulated annealing samples one and accepts according to probability
           - the genetic algorithm uses it as its mutation operator
         """
         r = rng or random
@@ -52,8 +51,8 @@ class MealPlan:
 
 
 if __name__ == "__main__":
-    # Quick reproducibility check: a seeded RNG gives identical plans,
-    # which matters for the "run each algorithm N times" evaluation plan.
+    # reproducibility check: a seeded RNG gives identical plans,
+    # matters for the "run each algorithm N times" evaluation plan.
     rng = random.Random(42)
     plan = MealPlan.random(pool_size=1000, rng=rng)
     print("slots:", plan.slots)

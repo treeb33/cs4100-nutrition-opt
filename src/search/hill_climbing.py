@@ -6,12 +6,13 @@ from src.evaluation.objective import score_plan
 
 
 def hill_climb(pool, user_prefs, rng=None, max_steps=1000):
-    """Single hill climbing run from a random start.
+    """
+    single hill climbing run from a random start.
     
-    At each step, samples one neighbor (single meal swap) and keeps it
+    tt each step sample one neighbor (single meal swap) and keeps it
     if it improves the score. Stops when no improvement or max_steps hit.
     
-    Returns (best_plan, best_score).
+    returns (best_plan, best_score).
     """
     if rng is None:
         rng = random.Random()
@@ -31,11 +32,12 @@ def hill_climb(pool, user_prefs, rng=None, max_steps=1000):
 
 
 def hill_climb_with_restarts(pool, user_prefs, rng=None, n_restarts=10, max_steps=1000):
-    """Run hill_climb n_restarts times, return the best result overall.
+    """
+    run hill_climb n_restarts times, return the best result overall.
     
-    This is the main entry point for experiments.
+    main entry point for experiments
     
-    Returns (best_plan, best_score).
+    returns (best_plan, best_score).
     """
     if rng is None:
         rng = random.Random()

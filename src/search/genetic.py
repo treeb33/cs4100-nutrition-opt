@@ -1,4 +1,4 @@
-"""Genetic algo for weekly meal plan optimizer"""
+"""genetic algo for weekly meal plan optimizer"""
 
 import random
 from src.meal_plan import MealPlan, NUM_SLOTS
