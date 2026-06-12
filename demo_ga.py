@@ -1,3 +1,6 @@
+## AI assistance (Claude) was used to help structure the demo script
+## and format the weekly meal plan output for readability.
+
 """
 Demo script — run genetic algorithm and print a readable weekly meal plan.
 
