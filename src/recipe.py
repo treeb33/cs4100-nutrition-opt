@@ -1,4 +1,4 @@
-"""Recipe representation and dataset loading for the meal planner."""
+"""recipe representation and dataset loading for the meal planner."""
 from __future__ import annotations
 
 import ast
