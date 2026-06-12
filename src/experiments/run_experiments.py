@@ -1,3 +1,7 @@
+## AI assistance (Claude) was used to help design the experiment pipeline structure, 
+## select appropriate matplotlib formatting for the convergence and bar chart plots, 
+## and debug the calorie constraint issue that caused all plans to score -1000000 
+## before switching to the curated pool approach.
 """
 Run comparison experiments and save plots to results/.
 
